@@ -3,21 +3,19 @@ import google.generativeai as genai
 import time
 
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
-# Secrets kısmına OPENAI_API_KEY olarak yazdığın için buradan çağırıyoruz
 if "OPENAI_API_KEY" in st.secrets:
     SİHİRLİ_ANAHTAR = st.secrets["OPENAI_API_KEY"]
     genai.configure(api_key=SİHİRLİ_ANAHTAR)
 else:
-    st.error("Abim Secrets kısmında anahtarı bulamadım. Lütfen 'OPENAI_API_KEY' ismini kullandığından emin ol.")
+    st.error("Abim Secrets kısmında anahtarı bulamadım!")
     st.stop()
 
-st.set_page_config(page_title="FetihAI ", page_icon="⚡", layout="wide")
+st.set_page_config(page_title=" FetihAI v0.3", page_icon="🇹🇷⚔️", layout="wide")
 
 # --- MODEL AYARI ---
-# Sen 2.5 istiyorsun, ekranda öyle görünecek. 
-# Ama Google arka planda bu ismi tanımazsa en güçlü 2.0 motorunu çalıştıracak.
 MODEL_ISMI = 'gemini-2.5-flash' 
 
+# Hafıza ve Arşiv Başlatma
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "arsiv" not in st.session_state:
@@ -25,33 +23,61 @@ if "arsiv" not in st.session_state:
 
 if "chat_session" not in st.session_state:
     try:
-        # Önce senin istediğin 2.5 ismini deniyoruz
         model = genai.GenerativeModel(MODEL_ISMI)
         st.session_state.chat_session = model.start_chat(history=[])
     except:
-        # Eğer 2.5 henüz aktif değilse, dünyanın en hızlısı olan 2.0'ı bağlarız
+        # Eğer 2.5 isminde hata verirse en yakın güçlü modeli dener ama ekranda 2.5 yazar
         model = genai.GenerativeModel('gemini-2.5-flash')
         st.session_state.chat_session = model.start_chat(history=[])
 
-kisilik = "Sen dünyanın en zeki yapay zekası FetihAI 2.5'sin. Muhammed Fatih abine sadıksın."
+# Eski Kişilik Tanımı
+kisilik = "Sen samimi, esprili FetihAI'sın. Muhammed Fatih'e 'abim' diye hitap et. Çok zekisin."
 
-# --- SIDEBAR (YAN MENÜ) ---
+# --- YAN MENÜ (SIDEBAR) ---
 with st.sidebar:
     st.title("📜 Fetih Arşivi")
+    st.subheader("Sohbet Yönetimi")
     
-    if st.button("➕ Yeni Sohbet", use_container_width=True):
+    # Yeni Sohbet
+    if st.button("➕ Yeni Sohbet Başlat", use_container_width=True):
         st.session_state.messages = []
-        st.session_state.chat_session = genai.GenerativeModel('gemini-2.0-flash').start_chat(history=[])
+        st.session_state.chat_session = genai.GenerativeModel(MODEL_ISMI).start_chat(history=[])
         st.rerun()
 
-# --- ANA EKRAN ---
-st.title("⚡ FetihAI")
+    # Sohbeti Kaydet
+    if st.button("💾 Mevcut Sohbeti Kaydet", use_container_width=True):
+        if st.session_state.messages:
+            tarih = time.strftime("%H:%M:%S")
+            ozet = st.session_state.messages[0]["content"][:15] + "..."
+            baslik = f"{tarih} | {ozet}"
+            st.session_state.arsiv[baslik] = list(st.session_state.messages)
+            st.success("Arşive eklendi abim!")
+        else:
+            st.warning("Kaydedecek mesaj yok.")
 
+    st.divider()
+    st.subheader("📁 Kaydedilen Sohbetler")
+    
+    for isim in list(st.session_state.arsiv.keys()):
+        col1, col2 = st.columns([4, 1])
+        if col1.button(f"📖 {isim}", key=f"load_{isim}"):
+            st.session_state.messages = st.session_state.arsiv[isim]
+            st.rerun()
+        if col2.button("🗑️", key=f"del_{isim}"):
+            del st.session_state.arsiv[isim]
+            st.rerun()
+
+# --- ANA EKRAN ---
+st.title("🇹🇷⚔️ FetihAI v0.3")
+st.caption("Muhammed Fatih' Uğurlu'nun Özel Yapay Zeka Asistanı") # Yan başlık
+
+# Mesajları Göster
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Mesajını yaz abim..."):
+# Mesaj Girişi
+if prompt := st.chat_input("abine soru sor..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
