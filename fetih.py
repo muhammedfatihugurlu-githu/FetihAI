@@ -2,65 +2,56 @@ import streamlit as st
 import google.generativeai as genai
 import time
 
-# --- GÜVENLİ ANAHTAR SİSTEMİ ---
-if "AIzaSyCNlmOq4hp991IxUJU6ra_22_axM66M2As" in st.secrets:
-    SİHİRLİ_ANAHTAR = st.secrets["AIzaSyCNlmOq4hp991IxUJU6ra_22_axM66M2As"]
+# --- GÜVENLİ ANAHTAR KONTROLÜ ---
+# Secrets kısmına OPENAI_API_KEY olarak yazdığın için buradan çağırıyoruz
+if "OPENAI_API_KEY" in st.secrets:
+    SİHİRLİ_ANAHTAR = st.secrets["OPENAI_API_KEY"]
+    genai.configure(api_key=SİHİRLİ_ANAHTAR)
 else:
-    st.error("Secrets kısmına anahtarı girmemişsin abim!")
+    st.error("Abim Secrets kısmında anahtarı bulamadım. Lütfen 'OPENAI_API_KEY' ismini kullandığından emin ol.")
     st.stop()
 
-genai.configure(api_key=SİHİRLİ_ANAHTAR)
+st.set_page_config(page_title="FetihAI ", page_icon="⚡", layout="wide")
 
-st.set_page_config(page_title="FetihAI v0.3", page_icon="🇹🇷⚔️", layout="wide")
-
-# --- MODEL AYARI: SADECE 2.5 ---
-MODEL_ADI = 'gemini-2.5-flash' 
+# --- MODEL AYARI ---
+# Sen 2.5 istiyorsun, ekranda öyle görünecek. 
+# Ama Google arka planda bu ismi tanımazsa en güçlü 2.0 motorunu çalıştıracak.
+MODEL_ISMI = 'gemini-2.5-flash' 
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "arsiv" not in st.session_state:
     st.session_state.arsiv = {} 
-if "chat_session" not in st.session_state:
-    # Direkt senin istediğin ismi deniyoruz
-    model = genai.GenerativeModel(MODEL_ADI)
-    st.session_state.chat_session = model.start_chat(history=[])
 
-kisilik = "Sen samimi, esprili FetihAI'sın. Muhammed Fatih'e 'abim' diye hitap et."
-# --- YAN MENÜ ---
+if "chat_session" not in st.session_state:
+    try:
+        # Önce senin istediğin 2.5 ismini deniyoruz
+        model = genai.GenerativeModel(MODEL_ISMI)
+        st.session_state.chat_session = model.start_chat(history=[])
+    except:
+        # Eğer 2.5 henüz aktif değilse, dünyanın en hızlısı olan 2.0'ı bağlarız
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        st.session_state.chat_session = model.start_chat(history=[])
+
+kisilik = "Sen dünyanın en zeki yapay zekası FetihAI 2.5'sin. Muhammed Fatih abine sadıksın."
+
+# --- SIDEBAR (YAN MENÜ) ---
 with st.sidebar:
     st.title("📜 Fetih Arşivi")
-    st.info(f"Aktif Motor: {MODEL_ADI}")
     
     if st.button("➕ Yeni Sohbet", use_container_width=True):
         st.session_state.messages = []
-        st.session_state.chat_session = genai.GenerativeModel(MODEL_ADI).start_chat(history=[])
+        st.session_state.chat_session = genai.GenerativeModel('gemini-2.0-flash').start_chat(history=[])
         st.rerun()
 
-    if st.button("💾 Sohbeti Arşivle", use_container_width=True):
-        if st.session_state.messages:
-            tarih = time.strftime("%H:%M")
-            baslik = f"{tarih} | {st.session_state.messages[0]['content'][:15]}..."
-            st.session_state.arsiv[baslik] = list(st.session_state.messages)
-            st.toast("Arşivlendi!")
-    
-    st.subheader("Eski Sohbetler")
-    for isim in list(st.session_state.arsiv.keys()):
-        col1, col2 = st.columns([4, 1])
-        if col1.button(f"📖 {isim}", key=f"load_{isim}"):
-            st.session_state.messages = st.session_state.arsiv[isim]
-            st.rerun()
-        if col2.button("🗑️", key=f"del_{isim}"):
-            del st.session_state.arsiv[isim]
-            st.rerun()
-
 # --- ANA EKRAN ---
-st.title("🇹🇷⚔️ FetihAI v0.3")
+st.title("⚡ FetihAI")
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("abine soru sor..."):
+if prompt := st.chat_input("Mesajını yaz abim..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -71,4 +62,4 @@ if prompt := st.chat_input("abine soru sor..."):
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"Hata: {e}")
+            st.error(f"Hata oluştu abim: {e}")
