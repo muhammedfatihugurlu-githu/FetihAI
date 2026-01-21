@@ -68,7 +68,7 @@ with st.sidebar:
             st.rerun()
 
 # --- ANA EKRAN ---
-st.title("🇹🇷⚔️ FetihAI v0.3")
+st.title("🇹🇷⚔️ FetihAI v0.3 Beyza tam bir bebek")
 st.caption("Muhammed Fatih Uğurlu'nun Özel Yapay Zeka Asistanı") # Yan başlık
 
 # Mesajları Göster
