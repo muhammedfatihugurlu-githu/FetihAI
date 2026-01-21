@@ -24,12 +24,12 @@ kisilik = "Sen samimi, esprili FetihAI'sın. Muhammed Fatih'e 'abim' diye hitap 
 # --- YAN MENÜ (SIDEBAR) ---
 with st.sidebar:
     st.title("📜 Fetih Arşivi")
-    st.info("Model: Gemini 2.0 Flash 🚀")
+    st.info("Model: Gemini 2.5 Flash 🚀")
     
     # Yeni Sohbet Butonu
     if st.button("➕ Yeni Sohbet Başlat", use_container_width=True):
         st.session_state.messages = []
-        st.session_state.chat_session = genai.GenerativeModel('gemini-2.0-flash').start_chat(history=[])
+        st.session_state.chat_session = genai.GenerativeModel('gemini-2.5-flash').start_chat(history=[])
         st.rerun()
 
     st.divider()
