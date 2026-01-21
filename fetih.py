@@ -3,7 +3,7 @@ import google.generativeai as genai
 import time
 
 # --- AYARLAR ---
-SİHİRLİ_ANAHTAR = "AIzaSyB4unpScQ46PpwROLrOgCaZ9t0mbk_Zkpk"
+SİHİRLİ_ANAHTAR = "AIzaSyCNlmOq4hp991IxUJU6ra_22_axM66M2As"
 genai.configure(api_key=SİHİRLİ_ANAHTAR)
 
 st.set_page_config(page_title="FetihAI v0.3", page_icon="🇹🇷⚔️", layout="wide")
