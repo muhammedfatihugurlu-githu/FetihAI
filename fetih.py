@@ -64,9 +64,10 @@ st.title("🇹🇷⚔️ FetihAI v0.4")
 st.caption("Muhammed Fatih Uğurlu'nun Özel Yapay Zeka Asistanı") # Yan Başlık
 
 # Mesajları Göster
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+with st.container(height=600):
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
 # --- MESAJ ÇUBUĞU ---
 st.markdown("<div style='height: 300px;'></div>")  # Spacer to push chat bar to bottom
@@ -78,6 +79,24 @@ st.markdown("""
     width: 40px !important;
     height: 40px !important;
     min-width: 40px !important;
+}
+.stChatInput {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 250px !important;
+    right: 0 !important;
+    background: white !important;
+    padding: 10px !important;
+    z-index: 1000 !important;
+}
+.stContainer:has([data-testid="stChatInput"]) {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 250px !important;
+    right: 0 !important;
+    background: white !important;
+    padding: 10px !important;
+    z-index: 1000 !important;
 }
 </style>
 """, unsafe_allow_html=True)
