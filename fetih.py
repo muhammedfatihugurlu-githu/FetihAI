@@ -69,6 +69,8 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # --- MESAJ ÇUBUĞU ---
+st.markdown("<div style='height: 300px;'></div>")  # Spacer to push chat bar to bottom
+
 st.markdown("""
 <style>
 [data-testid="stButton"] button {
