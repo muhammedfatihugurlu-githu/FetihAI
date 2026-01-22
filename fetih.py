@@ -56,6 +56,7 @@ with st.sidebar:
 
 # --- ANA EKRAN ---
 st.title("🇹🇷⚔️ FetihAI v0.4")
+st.caption("Muhammed Fatih Uğurlu'nun Özel Yapay Zeka Asistanı")
 
 # Mesajları Göster
 for message in st.session_state.messages:
