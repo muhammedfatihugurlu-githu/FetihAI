@@ -24,7 +24,7 @@ if "arsiv" not in st.session_state:
     st.session_state.arsiv = {}
 
 # KOTA DOSTU MODEL: Günde 1500 istek hakkı verir, hata almazsın.
-MODEL_NAME = 'gemini-2.5-flash' 
+MODEL_NAME = 'gemini-1.5-flash' 
 
 # --- 🛠️ FONKSİYONLAR ---
 
