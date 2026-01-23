@@ -14,7 +14,7 @@ else:
     st.stop()
 
 # --- 🎨 SAYFA AYARLARI ---
-st.set_page_config(page_title="FetihAI v4.0", page_icon="🇹🇷", layout="wide")
+st.set_page_config(page_title="FetihAI v4.1", page_icon="🇹🇷", layout="wide")
 
 # --- 🧠 HAFIZA VE ARŞİV ---
 if "messages" not in st.session_state:
@@ -24,24 +24,32 @@ if "arsiv" not in st.session_state:
 
 MODEL_NAME = 'gemini-1.5-flash'
 
-# --- 🛠️ YENİ NESİL ÇİZİM MOTORU (BEKLEME YAPMAZ) ---
+# --- 🛠️ YENİ NESİL ÇİZİM MOTORU (GÜÇLENDİRİLMİŞ) ---
 def resim_ciz_hizli(prompt_tr):
     try:
-        # Önce Gemini ile promptu süslüyoruz (Daha iyi çizim için)
-        model = genai.GenerativeModel(MODEL_NAME)
-        cevap = model.generate_content(f"Sadece İngilizceye çevir ve detaylandır (cool image prompt): {prompt_tr}")
-        prompt_en = cevap.text
-        
-        # Pollinations API: Token istemez, uyumaz, beklemez.
+        # 1. Adım: Gemini ile süslemeye çalış
+        prompt_en = prompt_tr # Varsayılan olarak Türkçesini tut
+        try:
+            model = genai.GenerativeModel(MODEL_NAME)
+            cevap = model.generate_content(f"Translate to English for image generation (short, artistic): {prompt_tr}", request_options={"timeout": 10})
+            if cevap.text:
+                prompt_en = cevap.text
+        except:
+            pass # Gemini hata verirse Türkçe devam et (Pollinations anlıyor)
+
+        # 2. Adım: Pollinations'a gönder
         encoded_prompt = urllib.parse.quote(prompt_en)
-        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={int(time.time())}"
+        # Seed ekleyerek her seferinde farklı resim gelmesini sağlıyoruz
+        seed = int(time.time())
+        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={seed}&model=flux"
         
-        response = requests.get(image_url, timeout=30)
+        response = requests.get(image_url, timeout=45)
         if response.status_code == 200:
             return response.content
-    except:
+        else:
+            return None
+    except Exception as e:
         return None
-    return None
 
 # --- 📜 YAN MENÜ (ARŞİV) ---
 with st.sidebar:
@@ -52,7 +60,8 @@ with st.sidebar:
     
     if st.button("💾 Sohbeti Kaydet", use_container_width=True):
         if st.session_state.messages:
-            baslik = f"{time.strftime('%H:%M')} | {st.session_state.messages[0]['content'][:15]}"
+            tarih = time.strftime("%H:%M")
+            baslik = f"{tarih} | {st.session_state.messages[0]['content'][:15]}..."
             st.session_state.arsiv[baslik] = list(st.session_state.messages)
             st.success("Kaydedildi!")
 
@@ -63,9 +72,8 @@ with st.sidebar:
             st.rerun()
 
 # --- 🖥️ ANA EKRAN ---
-st.title("🇹🇷 FetihAI v4.0")
+st.title("🇹🇷 FetihAI v4.1")
 
-# Sohbet geçmişi
 for m in st.session_state.messages:
     with st.chat_message(m["role"]): st.markdown(m["content"])
 
@@ -74,22 +82,24 @@ c1, c2 = st.columns(2)
 
 with c1:
     with st.expander("🖼️ Hızlı Resim Çizdir", expanded=False):
-        hayal = st.text_input("Ne hayal ediyorsun abim?", key="draw_v4")
+        hayal = st.text_input("Ne hayal ediyorsun?", key="draw_v41")
         if st.button("Hemen Oluştur", use_container_width=True):
             if hayal:
-                with st.spinner("FetihAI anında çiziyor..."):
+                with st.spinner("FetihAI fırçasını hazırladı..."):
                     img_bytes = resim_ciz_hizli(hayal)
                     if img_bytes:
-                        st.image(Image.open(io.BytesIO(img_bytes)), caption="Buyur abim, bekletme yok!")
+                        st.image(Image.open(io.BytesIO(img_bytes)), caption="Buyur abim!")
                     else:
-                        st.error("Bir aksilik oldu abim, tekrar bas.")
+                        st.error("Sunucu hattında bir kopukluk oldu. Lütfen tekrar bas abim.")
+            else:
+                st.info("Bir şeyler yazman lazım abim.")
 
 with c2:
     with st.expander("📸 Fotoğraf Analizi", expanded=False):
         yukle = st.file_uploader("Resim Seç", type=['png','jpg','jpeg'], label_visibility="collapsed")
 
 # --- 💬 SOHBET ---
-if prompt := st.chat_input("Yaz abim..."):
+if prompt := st.chat_input("Mesajını yaz abim..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"): st.markdown(prompt)
 
@@ -99,8 +109,8 @@ if prompt := st.chat_input("Yaz abim..."):
             if yukle:
                 res = model.generate_content(["Abine samimi cevap ver:", Image.open(yukle), prompt])
             else:
-                res = model.generate_content(f"Kullanıcı Muhammed Fatih (Abim). Samimi ve zeki ol: {prompt}")
+                res = model.generate_content(f"Muhammed Fatih abine samimi ve zeki bir asistan gibi cevap ver: {prompt}")
             st.markdown(res.text)
             st.session_state.messages.append({"role": "assistant", "content": res.text})
-        except Exception as e:
-            st.error("Google taraflı bir sorun oldu abim.")
+        except:
+            st.error("Sohbet motorunda bir takılma oldu.")
