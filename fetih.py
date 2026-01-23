@@ -96,3 +96,16 @@ if prompt := st.chat_input("İstediğini yaz abim..."):
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
             st.error(f"Hata: {e}")
+
+# --- 🎨 FOTOĞRAF OLUŞTURMA & EKLEME PANELİ ---
+st.divider()
+col1, col2 = st.columns(2)
+
+with col1:
+    with st.expander("🖼️ Fotoğraf Oluştur", expanded=False):
+        hayal = st.text_input("Ne çizeyim abim?", placeholder="Örn: Ormanda koşan kurt...")
+        if st.button("Oluştur abi, görelim!", use_container_width=True):
+            with st.spinner("FetihAI hayal ediyor..."):
+                # Burada direkt modele resim çizme komutu gidiyor
+                response = st.session_state.chat_session.send_message(f"ÇİZİM YAP: {hayal}")
+                st.write(response.text) # Model resim linki veya onay döner
