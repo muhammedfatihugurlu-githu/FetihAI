@@ -4,18 +4,17 @@ import time
 from PIL import Image
 import requests
 import io
-from google.api_core import exceptions
+import urllib.parse
 
-# --- 🔑 ANAHTAR KONTROLLERİ ---
-if "OPENAI_API_KEY" in st.secrets and "HF_TOKEN" in st.secrets:
+# --- 🔑 ANAHTAR KONTROLÜ ---
+if "OPENAI_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["OPENAI_API_KEY"])
-    HF_TOKEN = st.secrets["HF_TOKEN"]
 else:
-    st.error("Secrets eksik abim! Streamlit panelinden HF_TOKEN ve OPENAI_API_KEY'i kontrol et.")
+    st.error("Abim Secrets kısmında OPENAI_API_KEY eksik!")
     st.stop()
 
 # --- 🎨 SAYFA AYARLARI ---
-st.set_page_config(page_title="FetihAI v3.1", page_icon="🇹🇷", layout="wide")
+st.set_page_config(page_title="FetihAI v4.0", page_icon="🇹🇷", layout="wide")
 
 # --- 🧠 HAFIZA VE ARŞİV ---
 if "messages" not in st.session_state:
@@ -23,35 +22,25 @@ if "messages" not in st.session_state:
 if "arsiv" not in st.session_state:
     st.session_state.arsiv = {}
 
-# KOTA DOSTU MODEL: Günde 1500 istek hakkı verir, hata almazsın.
-MODEL_NAME = 'gemini-1.5-flash' 
+MODEL_NAME = 'gemini-1.5-flash'
 
-# --- 🛠️ FONKSİYONLAR ---
-
-def guvenli_cevir(metin):
+# --- 🛠️ YENİ NESİL ÇİZİM MOTORU (BEKLEME YAPMAZ) ---
+def resim_ciz_hizli(prompt_tr):
     try:
+        # Önce Gemini ile promptu süslüyoruz (Daha iyi çizim için)
         model = genai.GenerativeModel(MODEL_NAME)
-        res = model.generate_content(f"Sadece İngilizceye çevir (image prompt): {metin}")
-        return res.text
-    except: return metin
-
-def resim_ciz_motoru(prompt_en):
-    # ŞU ANIN EN HIZLI VE EN İYİ MODELİ: FLUX.1-schnell
-    API_URL = "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
-    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-    
-    # 5 kere inatla deniyoruz
-    for i in range(5):
-        try:
-            response = requests.post(API_URL, headers=headers, json={"inputs": prompt_en}, timeout=40)
-            if response.status_code == 200:
-                return response.content
-            elif response.status_code == 503:
-                st.toast(f"Motor ısınıyor, saniye {i*10+10}/50...", icon="💤")
-                time.sleep(10) 
-            else:
-                time.sleep(2)
-        except: continue
+        cevap = model.generate_content(f"Sadece İngilizceye çevir ve detaylandır (cool image prompt): {prompt_tr}")
+        prompt_en = cevap.text
+        
+        # Pollinations API: Token istemez, uyumaz, beklemez.
+        encoded_prompt = urllib.parse.quote(prompt_en)
+        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={int(time.time())}"
+        
+        response = requests.get(image_url, timeout=30)
+        if response.status_code == 200:
+            return response.content
+    except:
+        return None
     return None
 
 # --- 📜 YAN MENÜ (ARŞİV) ---
@@ -65,18 +54,18 @@ with st.sidebar:
         if st.session_state.messages:
             baslik = f"{time.strftime('%H:%M')} | {st.session_state.messages[0]['content'][:15]}"
             st.session_state.arsiv[baslik] = list(st.session_state.messages)
-            st.success("Arşive eklendi!")
+            st.success("Kaydedildi!")
 
     st.divider()
-    st.subheader("Geçmiş Sohbetler")
     for k in list(st.session_state.arsiv.keys()):
         if st.button(k, use_container_width=True):
             st.session_state.messages = st.session_state.arsiv[k]
             st.rerun()
 
 # --- 🖥️ ANA EKRAN ---
-st.title("🇹🇷 FetihAI v3.1")
+st.title("🇹🇷 FetihAI v4.0")
 
+# Sohbet geçmişi
 for m in st.session_state.messages:
     with st.chat_message(m["role"]): st.markdown(m["content"])
 
@@ -84,21 +73,20 @@ st.divider()
 c1, c2 = st.columns(2)
 
 with c1:
-    with st.expander("🖼️ Resim Çizdir (Hızlı Mod)", expanded=False):
-        hayal = st.text_input("Ne hayal ediyorsun?", key="draw_v3")
-        if st.button("Hemen Çiz", use_container_width=True):
+    with st.expander("🖼️ Hızlı Resim Çizdir", expanded=False):
+        hayal = st.text_input("Ne hayal ediyorsun abim?", key="draw_v4")
+        if st.button("Hemen Oluştur", use_container_width=True):
             if hayal:
-                with st.spinner("FetihAI fırçasını kaptı, geliyor..."):
-                    en_p = guvenli_cevir(hayal)
-                    img_data = resim_ciz_motoru(en_p)
-                    if img_data:
-                        st.image(Image.open(io.BytesIO(img_data)), caption="Buyur abim!")
+                with st.spinner("FetihAI anında çiziyor..."):
+                    img_bytes = resim_ciz_hizli(hayal)
+                    if img_bytes:
+                        st.image(Image.open(io.BytesIO(img_bytes)), caption="Buyur abim, bekletme yok!")
                     else:
-                        st.error("Abim bu sefer sunucu gerçekten ağır bakımda. 2-3 dakika sonra tekrar denersen düzelecektir.")
+                        st.error("Bir aksilik oldu abim, tekrar bas.")
 
 with c2:
     with st.expander("📸 Fotoğraf Analizi", expanded=False):
-        yukle = st.file_uploader("Dosya Seç", type=['png','jpg','jpeg'], label_visibility="collapsed")
+        yukle = st.file_uploader("Resim Seç", type=['png','jpg','jpeg'], label_visibility="collapsed")
 
 # --- 💬 SOHBET ---
 if prompt := st.chat_input("Yaz abim..."):
@@ -109,10 +97,9 @@ if prompt := st.chat_input("Yaz abim..."):
         try:
             model = genai.GenerativeModel(MODEL_NAME)
             if yukle:
-                res = model.generate_content(["Resmi yorumla ve abine cevap ver:", Image.open(yukle), prompt])
+                res = model.generate_content(["Abine samimi cevap ver:", Image.open(yukle), prompt])
             else:
-                res = model.generate_content(f"Kullanıcı Muhammed Fatih. Samimi bir asistan gibi cevap ver: {prompt}")
+                res = model.generate_content(f"Kullanıcı Muhammed Fatih (Abim). Samimi ve zeki ol: {prompt}")
             st.markdown(res.text)
             st.session_state.messages.append({"role": "assistant", "content": res.text})
-        except exceptions.ResourceExhausted:
-            st.error("Google kota doldu, az bekle abim.")
+        except Exception as e
