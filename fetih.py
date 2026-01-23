@@ -14,7 +14,7 @@ else:
     st.error("Abim Secrets kısmında anahtarı bulamadım!")
     st.stop()
 
-st.set_page_config(page_title="FetihAI v4.8", page_icon="🇹🇷⚔️", layout="wide")
+st.set_page_config(page_title="FetihAI v0.5", page_icon="🇹🇷⚔️", layout="wide")
 
 # --- MODEL AYARI ---
 MODEL_ISMI = 'gemini-2.5-flash' 
@@ -73,7 +73,7 @@ with st.sidebar:
             st.rerun()
 
 # --- ANA EKRAN ---
-st.title("🇹🇷⚔️ FetihAI v4.8")
+st.title("🇹🇷⚔️ FetihAI v0.5")
 st.caption("Muhammed Fatih Uğurlu'nun Özel Yapay Zeka Asistanı")
 
 # Mesajları Göster
@@ -87,24 +87,24 @@ col_cizim, col_foto = st.columns(2)
 
 with col_cizim:
     with st.expander("🎨 Resim Çizdir", expanded=False):
-        hayal = st.text_input("Ne çizelim abim?", key="simple_draw")
+        hayal = st.text_input("Ne çizeyim abim?", key="simple_draw")
         if st.button("Çiz Gelsin", use_container_width=True):
             if hayal:
                 with st.spinner("Çiziyorum abim..."):
                     img_bytes = resim_ciz_hizli(hayal)
                     if img_bytes:
-                        st.image(img_bytes, caption="Buyur abim!")
+                        st.image(img_bytes, caption="Hakkını helal et, elimden bu geldi!")
                     else:
                         st.error("Bağlantı zayıf, tekrar bas abim.")
 
 with col_foto:
-    with st.expander("📸 Fotoğraf Ekle", expanded=False):
+    with st.expander("📸 Fotoğraf Gönder", expanded=False):
         yuklenen_dosya = st.file_uploader("Resim Yükle", type=['png', 'jpg', 'jpeg'], label_visibility="collapsed")
         if yuklenen_dosya:
             st.image(yuklenen_dosya, width=200)
 
 # --- MESAJ ÇUBUĞU ---
-if prompt := st.chat_input("Yaz abim..."):
+if prompt := st.chat_input("İstediğini yaz abim..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
