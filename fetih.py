@@ -19,7 +19,7 @@ st.set_page_config(page_title="FetihAI v4.5", page_icon="🇹🇷⚔️", layout
 # --- MODEL AYARI ---
 # Abim, '2.5-flash' çok hata verdiği için senin kodunu bozmadan
 # burayı '1.5-flash' yaptım ki günde 1500 mesaj atabilesin, hata alma.
-MODEL_ISMI = 'gemini-1.5-flash' 
+MODEL_ISMI = 'gemini-2.5-flash' 
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
