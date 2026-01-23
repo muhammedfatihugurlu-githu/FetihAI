@@ -5,7 +5,6 @@ from PIL import Image
 import requests
 import io
 import urllib.parse
-import random
 
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
 if "OPENAI_API_KEY" in st.secrets:
@@ -15,10 +14,10 @@ else:
     st.error("Abim Secrets kısmında anahtarı bulamadım!")
     st.stop()
 
-st.set_page_config(page_title="FetihAI v4.7", page_icon="🇹🇷⚔️", layout="wide")
+st.set_page_config(page_title="FetihAI v4.8", page_icon="🇹🇷⚔️", layout="wide")
 
 # --- MODEL AYARI ---
-MODEL_ISMI = 'gemini-2.5-flash' 
+MODEL_ISMI = 'gemini-1.5-flash' 
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -31,23 +30,15 @@ if "chat_session" not in st.session_state:
 
 kisilik = "Sen samimi, esprili FetihAI'sın. Senin yapımcın Muhammed Fatih Uğurlu'dur. Kullanıcı kendisinin Muhammed Fatih Uğurlu olduğunu söylerse ona 'abim' diye hitap et, ona saygı duy. Çok zekisin. Kullanıcılara hoş ve net cevaplar ver, araya espri kaynat. Her cevap başında 'vay, hoşgeldin, ooo' kelimelerini kullanma."
 
-# --- 🛠️ HIZLI ÇİZİM FONKSİYONU ---
+# --- 🛠️ ÇİZİM MOTORU (EN SADE HALİ) ---
 def resim_ciz_hizli(prompt_tr):
     try:
-        model_cevir = genai.GenerativeModel(MODEL_ISMI)
-        try:
-            cevap = model_cevir.generate_content(f"Translate to English for image generation: {prompt_tr}")
-            prompt_en = cevap.text if cevap.text else prompt_tr
-        except:
-            prompt_en = prompt_tr
-
-        encoded_prompt = urllib.parse.quote(prompt_en)
-        random_seed = random.randint(1, 1000000)
+        # Karmaşık çeviri yerine basit bir yapı
+        encoded_prompt = urllib.parse.quote(prompt_tr)
+        # En stabil link yapısı
+        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true"
         
-        # Cache-busting için sonuna rastgele sayı ekliyoruz
-        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={random_seed}&model=flux"
-        
-        response = requests.get(image_url, timeout=35)
+        response = requests.get(image_url, timeout=30)
         if response.status_code == 200:
             return response.content
     except:
@@ -82,7 +73,7 @@ with st.sidebar:
             st.rerun()
 
 # --- ANA EKRAN ---
-st.title("🇹🇷⚔️ FetihAI v4.7")
+st.title("🇹🇷⚔️ FetihAI v4.8")
 st.caption("Muhammed Fatih Uğurlu'nun Özel Yapay Zeka Asistanı")
 
 # Mesajları Göster
@@ -96,30 +87,24 @@ col_cizim, col_foto = st.columns(2)
 
 with col_cizim:
     with st.expander("🎨 Resim Çizdir", expanded=False):
-        hayal = st.text_input("Ne hayal ediyorsun abim?", key="hayal_input")
-        if st.button("Hemen Çiz", use_container_width=True):
+        hayal = st.text_input("Ne çizelim abim?", key="simple_draw")
+        if st.button("Çiz Gelsin", use_container_width=True):
             if hayal:
-                with st.spinner("FetihAI fırçasını hazırladı..."):
+                with st.spinner("Çiziyorum abim..."):
                     img_bytes = resim_ciz_hizli(hayal)
                     if img_bytes:
-                        # HATA BURADAYDI: key parametresini kaldırdım.
-                        st.image(Image.open(io.BytesIO(img_bytes)), caption="Buyur abim!")
+                        st.image(img_bytes, caption="Buyur abim!")
                     else:
-                        st.error("Motor anlık takıldı, tekrar dener misin abim?")
+                        st.error("Bağlantı zayıf, tekrar bas abim.")
 
 with col_foto:
-    with st.expander("📸 Fotoğraf Ekle (Analiz)", expanded=False):
-        st.caption("Kamera veya Galeri'den fotoğraf seç abim:")
-        yuklenen_dosya = st.file_uploader(
-            "Resim Yükle", 
-            type=['png', 'jpg', 'jpeg'], 
-            label_visibility="collapsed"
-        )
+    with st.expander("📸 Fotoğraf Ekle", expanded=False):
+        yuklenen_dosya = st.file_uploader("Resim Yükle", type=['png', 'jpg', 'jpeg'], label_visibility="collapsed")
         if yuklenen_dosya:
-            st.image(yuklenen_dosya, width=200, caption="Gönderilecek resim")
+            st.image(yuklenen_dosya, width=200)
 
 # --- MESAJ ÇUBUĞU ---
-if prompt := st.chat_input("İstediğini yaz abim..."):
+if prompt := st.chat_input("Yaz abim..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -136,4 +121,4 @@ if prompt := st.chat_input("İstediğini yaz abim..."):
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"Hata oluştu abim: {e}")
+            st.error(f"Hata: {e}")
