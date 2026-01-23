@@ -2,142 +2,98 @@ import streamlit as st
 import google.generativeai as genai
 import time
 from PIL import Image
-import requests
-import io
-from google.api_core import exceptions
 
-# --- 🔑 ANAHTAR KONTROLLERİ ---
-if "OPENAI_API_KEY" in st.secrets and "HF_TOKEN" in st.secrets:
-    genai.configure(api_key=st.secrets["OPENAI_API_KEY"])
-    HF_TOKEN = st.secrets["HF_TOKEN"]
+# --- GÜVENLİ ANAHTAR KONTROLÜ ---
+if "OPENAI_API_KEY" in st.secrets:
+    SİHİRLİ_ANAHTAR = st.secrets["OPENAI_API_KEY"]
+    genai.configure(api_key=SİHİRLİ_ANAHTAR)
 else:
-    st.error("Abim Secrets kısmında OPENAI_API_KEY veya HF_TOKEN eksik!")
+    st.error("Abim Secrets kısmında anahtarı bulamadım!")
     st.stop()
 
-# --- 🎨 SAYFA AYARLARI ---
-st.set_page_config(page_title="FetihAI v2.6", page_icon="🇹🇷", layout="wide")
+st.set_page_config(page_title="FetihAI v0.4", page_icon="🇹🇷⚔️", layout="wide")
 
-# CSS: Arayüzü toparlar
-st.markdown("""
-    <style>
-    .stFileUploader {min-height: 0px !important;}
-    .stFileUploader label {display: none !important;}
-    .stChatFloatingInputContainer {padding-bottom: 20px;}
-    </style>
-    """, unsafe_allow_html=True)
+# --- MODEL AYARI ---
+MODEL_ISMI = 'gemini-2.5-flash' 
 
-# --- 🧠 HAFIZA VE ARŞİV SİSTEMİ ---
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "arsiv" not in st.session_state:
-    st.session_state.arsiv = {}
+    st.session_state.arsiv = {} 
 
-MODEL_NAME = 'gemini-2.5-flash'
+if "chat_session" not in st.session_state:
+    model = genai.GenerativeModel(MODEL_ISMI)
+    st.session_state.chat_session = model.start_chat(history=[])
 
-# --- 🛠️ FONKSİYONLAR ---
-
-def guvenli_cevir(metin):
-    """Kota hatasına karşı dirençli çeviri"""
-    try:
-        model = genai.GenerativeModel(MODEL_NAME)
-        res = model.generate_content(f"Translate this to English (only output translation): {metin}")
-        return res.text
-    except exceptions.ResourceExhausted:
-        st.error("Google kotası doldu, 15-20 saniye bekle abim.")
-        return None
-    except: return metin
-
-def resim_ciz_inatci(prompt_en):
-    """Motor uyanana kadar 4 defa dener"""
-    API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
-    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-    
-    deneme_sayisi = 4
-    for i in range(deneme_sayisi):
-        response = requests.post(API_URL, headers=headers, json={"inputs": prompt_en})
-        if response.status_code == 200:
-            return response.content
-        elif response.status_code in [503, 429]:
-            # Motor yükleniyor demektir, bekle ve mesaj ver
-            if i < deneme_sayisi - 1:
-                st.toast(f"Motor uyanıyor... Deneme {i+1}/{deneme_sayisi}", icon="💤")
-                time.sleep(10) # 10 saniye bekle ve tekrar dene
-            continue
-    return None
-
-# --- 📜 YAN MENÜ (ARŞİV) ---
+kisilik = "Sen samimi, esprili FetihAI'sın. Senin yapımcın Muhammed Fatih Uğurlu'dur. Kullanıcı kendisinin Muhammed Fatih Uğurlu olduğunu söylerse ona 'abim' diye hitap et, ona saygı duy. Çok zekisin. Kullanıcılara hoş ve net cevaplar ver, araya espri kaynat. Her cevap başında 'vay, hoşgeldin, ooo' kelimelerini kullanma."
+# --- YAN MENÜ (ARŞİV & KAYIT) ---
 with st.sidebar:
     st.title("📜 Fetih Arşivi")
+    
     if st.button("➕ Yeni Sohbet", use_container_width=True):
         st.session_state.messages = []
+        st.session_state.chat_session = genai.GenerativeModel(MODEL_ISMI).start_chat(history=[])
         st.rerun()
-    
+
     if st.button("💾 Sohbeti Kaydet", use_container_width=True):
         if st.session_state.messages:
-            tarih_saat = time.strftime("%H:%M:%S")
-            baslik = f"{tarih_saat} | {st.session_state.messages[0]['content'][:15]}..."
-            st.session_state.arsiv[baslik] = list(st.session_state.messages)
-            st.sidebar.success("Kaydedildi!")
+            tarih = time.strftime("%H:%M")
+            ozet = st.session_state.messages[0]["content"][:15]
+            st.session_state.arsiv[f"{tarih} | {ozet}"] = list(st.session_state.messages)
+            st.success("Kaydedildi abim!")
 
     st.divider()
     st.subheader("Eski Kayıtlar")
-    for key in list(st.session_state.arsiv.keys()):
-        if st.button(key, use_container_width=True):
-            st.session_state.messages = st.session_state.arsiv[key]
+    for isim in list(st.session_state.arsiv.keys()):
+        c1, c2 = st.columns([4,1])
+        if c1.button(f"{isim}", key=f"l_{isim}"):
+            st.session_state.messages = st.session_state.arsiv[isim]
+            st.rerun()
+        if c2.button("🗑️", key=f"d_{isim}"):
+            del st.session_state.arsiv[isim]
             st.rerun()
 
-# --- 🖥️ ANA EKRAN ---
-st.title("🇹🇷 FetihAI v2.6")
+# --- ANA EKRAN ---
+st.title("🇹🇷⚔️ FetihAI v0.4")
+st.caption("Muhammed Fatih Uğurlu'nun Özel Yapay Zeka Asistanı")
 
-# Sohbet geçmişini göster
-for m in st.session_state.messages:
-    with st.chat_message(m["role"]):
-        st.markdown(m["content"])
+# Mesajları Göster
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# --- 🛠️ ARAÇ PANELI ---
-st.divider()
-col_ciz, col_analiz = st.columns(2)
+# --- FOTOĞRAF ALANI (Genisletici Menü) ---
+# Mesajların bittiği yere koyuyoruz.
+st.write("---") # Ayırıcı çizgi
+with st.expander("📸 Fotoğraf Ekle", expanded=False):
+    st.caption("Kamera veya Galeri'den fotoğraf seç abim:")
+    yuklenen_dosya = st.file_uploader(
+        "Resim Yükle", 
+        type=['png', 'jpg', 'jpeg'], 
+        label_visibility="collapsed"
+    )
+    
+    if yuklenen_dosya:
+        st.image(yuklenen_dosya, width=200, caption="Bu resim gönderilecek")
+        st.success("Resim hafızada! Şimdi aşağıya sorunu yaz abim.")
 
-with col_ciz:
-    with st.expander("🖼️ Fotoğraf Oluştur", expanded=False):
-        cizim_input = st.text_input("Ne hayal ediyorsun abim?", key="ciz_in")
-        if st.button("Hayali Çiz", use_container_width=True):
-            if cizim_input:
-                with st.spinner("FetihAI hayal ediyor... (Motor uyanıyor olabilir)"):
-                    ing_prompt = guvenli_cevir(cizim_input)
-                    if ing_prompt:
-                        img_bytes = resim_ciz_inatci(ing_prompt)
-                        if img_bytes:
-                            st.image(Image.open(io.BytesIO(img_bytes)), caption="Buyur abim, çizdim.")
-                        else:
-                            st.error("Motor şu an çok ağır uykuda, 30 saniye sonra tekrar dener misin?")
-            else:
-                st.info("Çizmem için bir şeyler yazmalısın abim.")
-
-with col_analiz:
-    with st.expander("📸 Fotoğraf Analizi", expanded=False):
-        dosya = st.file_uploader("Resim Seç", type=['png','jpg','jpeg'], key="analiz_yukle")
-        if dosya:
-            st.image(dosya, width=150)
-
-# --- 💬 SOHBET GİRİŞİ ---
-if prompt := st.chat_input("Mesajını yaz abim..."):
+# --- MESAJ ÇUBUĞU (En Altta) ---
+if prompt := st.chat_input("İstediğini yaz abim..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
         try:
-            model = genai.GenerativeModel(MODEL_NAME)
-            if dosya:
-                img_data = Image.open(dosya)
-                response = model.generate_content(["Sen samimi FetihAI'sın, abine cevap ver.", img_data, prompt])
+            if yuklenen_dosya:
+                img = Image.open(yuklenen_dosya)
+                model_multi = genai.GenerativeModel(MODEL_ISMI)
+                response = model_multi.generate_content([f"{kisilik}\nSoru: {prompt}", img])
             else:
-                response = model.generate_content(f"Muhammed Fatih abine samimi cevap ver: {prompt}")
+                response = st.session_state.chat_session.send_message(f"{kisilik}\nSoru: {prompt}")
             
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
-        except exceptions.ResourceExhausted:
-            st.error("Google kotası doldu, biraz bekle abim.")
         except Exception as e:
-            st.error(f"Hata oluştu abim: {e}")
+            st.error(f"Hata: {e}")
+
