@@ -2,6 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 import time
 from PIL import Image
+import requests
 import io
 
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
@@ -16,7 +17,7 @@ st.set_page_config(page_title="FetihAI v0.4", page_icon="🇹🇷⚔️", layout
 
 # --- MODEL AYARI ---
 MODEL_ISMI = 'gemini-2.5-flash' 
-IMAGE_MODEL = 'imagen-3' # Gerçek çizim motoru abim!
+
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -118,3 +119,14 @@ with col1:
                     st.success("İşte abim, hayalin gerçek oldu!")
                 except Exception as e:
                     st.error(f"Çizim motoru hatası abim: {e}")
+
+# --- RESİM ÇİZME FONKSİYONU (ÜCRETSİZ MOTOR) ---
+def resim_ciz(prompt):
+    # Ücretsiz ve güçlü bir model kullanıyoruz: Stable Diffusion
+    API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
+    # Buraya geçici bir token koydum, çok yüklenilirse kendi ücretsiz HuggingFace tokenini alabilirsin abim
+    headers = {"Authorization": "Bearer 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"} 
+    
+    payload = {"inputs": prompt}
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.content
