@@ -17,7 +17,7 @@ else:
 st.set_page_config(page_title="FetihAI v4.8", page_icon="🇹🇷⚔️", layout="wide")
 
 # --- MODEL AYARI ---
-MODEL_ISMI = 'gemini-1.5-flash' 
+MODEL_ISMI = 'gemini-2.5-flash' 
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
