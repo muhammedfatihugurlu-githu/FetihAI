@@ -99,15 +99,22 @@ if prompt := st.chat_input("İstediğini yaz abim..."):
         except Exception as e:
             st.error(f"Hata: {e}")
 
-# --- 🎨 FOTOĞRAF OLUŞTURMA & EKLEME PANELİ ---
+# --- 🚀 ÇİZİM VE ANALİZ PANELİ (TAM YERİNDE) ---
 st.divider()
 col1, col2 = st.columns(2)
 
 with col1:
-    with st.expander("🖼️ Fotoğraf Oluştur", expanded=False):
-        hayal = st.text_input("Ne çizeyim abim?", placeholder="Örn: Ormanda koşan kurt...")
+    with st.expander("🖼️ Görsel Oluştur", expanded=False):
+        hayal = st.text_input("Ne çizeyim abim?", placeholder="Örn: Koşan tavuk...")
         if st.button("Oluştur, görelim!", use_container_width=True):
-            with st.spinner("FetihAI hayal ediyor..."):
-                # Burada direkt modele resim çizme komutu gidiyor
-                response = st.session_state.chat_session.send_message(f"ÇİZİM YAP: {hayal}")
-                st.write(response.text) # Model resim linki veya onay döner
+            with st.spinner("FetihAI hayal ediyor ve çiziyor..."):
+                try:
+                    # Imagen modelini çağırıyoruz
+                    imagen = genai.ImageGenerationModel(IMAGE_MODEL)
+                    # Çizim komutunu gönderiyoruz
+                    result = imagen.generate_images(prompt=hayal, number_of_images=1)
+                    # Çizilen resmi ekranda gösteriyoruz
+                    st.image(result.images[0]._pil_image, caption="FetihAI Çizimi", use_container_width=True)
+                    st.success("İşte abim, hayalin gerçek oldu!")
+                except Exception as e:
+                    st.error(f"Çizim motoru hatası abim: {e}")
