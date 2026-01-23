@@ -2,6 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 import time
 from PIL import Image
+import io
 
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
 if "OPENAI_API_KEY" in st.secrets:
@@ -15,6 +16,7 @@ st.set_page_config(page_title="FetihAI v0.4", page_icon="🇹🇷⚔️", layout
 
 # --- MODEL AYARI ---
 MODEL_ISMI = 'gemini-2.5-flash' 
+IMAGE_MODEL = 'imagen-3' # Gerçek çizim motoru abim!
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
