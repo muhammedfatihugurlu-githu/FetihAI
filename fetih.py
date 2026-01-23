@@ -104,7 +104,7 @@ col1, col2 = st.columns(2)
 with col1:
     with st.expander("🖼️ Fotoğraf Oluştur", expanded=False):
         hayal = st.text_input("Ne çizeyim abim?", placeholder="Örn: Ormanda koşan kurt...")
-        if st.button("Oluştur abi, görelim!", use_container_width=True):
+        if st.button("Oluştur, görelim!", use_container_width=True):
             with st.spinner("FetihAI hayal ediyor..."):
                 # Burada direkt modele resim çizme komutu gidiyor
                 response = st.session_state.chat_session.send_message(f"ÇİZİM YAP: {hayal}")
