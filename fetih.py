@@ -19,7 +19,7 @@ st.set_page_config(page_title="FetihAI v2.2", page_icon="🇹🇷")
 # --- KOTA DOSTU ÇEVİRİ FONKSİYONU ---
 def guvenli_cevir(metin):
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         # Kotayı yormamak için kısa ve net bir sistem mesajıyla çeviriyoruz
         response = model.generate_content(f"Translate this to English for an image prompt, only output the translation: {metin}")
         return response.text
