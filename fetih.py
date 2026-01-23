@@ -102,4 +102,5 @@ if prompt := st.chat_input("Yaz abim..."):
                 res = model.generate_content(f"Kullanıcı Muhammed Fatih (Abim). Samimi ve zeki ol: {prompt}")
             st.markdown(res.text)
             st.session_state.messages.append({"role": "assistant", "content": res.text})
-        except Exception as e
+        except Exception as e:
+            st.error("Google taraflı bir sorun oldu abim.")
