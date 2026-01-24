@@ -136,35 +136,40 @@ with col_cizim: # Veya uygun gördüğün bir sütun
         key='sesli_fetih'
     )
 
-# --- ⌨️ YAZILI GİRİŞ (En Altta Dursun) ---
+# --- 🎤 SESLİ VE ⌨️ YAZILI GİRİŞ (TEKİL KONTROL) ---
+
+# 1. Ses butonunu araçlar paneline veya uygun bir yere koyduk (Zaten yukarıda tanımladıysan buraya tekrar yazma)
+# Buradaki püf nokta: Her widget'ın 'key' parametresi benzersiz olmalı.
+
+# 2. Girişleri yakalıyoruz
 yazi_metni = st.chat_input("İstediğini yaz abim...")
 
-# --- 🧠 İKİSİNİ BİRLEŞTİREN MANTIK ---
-# Eğer ses geldiyse onu kullan, yoksa yazıya bak
-prompt = None
-if ses_metni:
-    prompt = ses_metni
-elif yazi_metni:
-    prompt = yazi_metni
+# 3. Mantık Kuruyoruz (Hangi input doluysa onu al)
+final_prompt = None
 
-# Eğer elimizde bir şekilde bir metin varsa işlemleri başlat
-if prompt:
-    # 1. Kullanıcı mesajını ekrana bas ve hafızaya ekle
-    st.session_state.messages.append({"role": "user", "content": prompt})
+if yazi_metni:
+    final_prompt = yazi_metni
+elif 'ses_metni' in locals() and ses_metni: # Yukarıda ses_metni değişkeni tanımlıysa
+    final_prompt = ses_metni
+
+# 4. İşlem Başlatma
+if final_prompt:
+    # Kullanıcı mesajını ekrana bas
+    st.session_state.messages.append({"role": "user", "content": final_prompt})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(final_prompt)
 
-    # 2. Gemini'den cevap al
+    # Gemini Cevabı
     with st.chat_message("assistant"):
         try:
-            # Fotoğraf var mı kontrolü
-            if yuklenen_dosya:
+            # Fotoğraf kontrolü ve cevap üretme
+            if 'yuklenen_dosya' in locals() and yuklenen_dosya:
                 img = Image.open(yuklenen_dosya)
-                response = genai.GenerativeModel(MODEL_ISMI).generate_content([f"{kisilik}\nSoru: {prompt}", img])
+                response = genai.GenerativeModel(MODEL_ISMI).generate_content([f"{kisilik}\nSoru: {final_prompt}", img])
             else:
-                response = st.session_state.chat_session.send_message(f"{kisilik}\nSoru: {prompt}")
+                response = st.session_state.chat_session.send_message(f"{kisilik}\nSoru: {final_prompt}")
             
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"Bir aksilik oldu abim: {e}")
+            st.error(f"Bir hata oldu abim: {e}")
