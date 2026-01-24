@@ -1,10 +1,12 @@
 import streamlit as st
 import google.generativeai as genai
 import time
-from PIL import Image
 import requests
 import io
 import urllib.parse
+import speech_to_text
+from PIL import Image
+
 
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
 if "OPENAI_API_KEY" in st.secrets:
