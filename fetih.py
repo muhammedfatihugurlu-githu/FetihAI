@@ -4,7 +4,7 @@ import time
 from PIL import Image
 import requests
 import io
-import urllib.parse
+import urllib.parse 
 import random
 from streamlit_mic_recorder import mic_recorder, speech_to_text
 
