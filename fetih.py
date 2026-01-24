@@ -131,9 +131,31 @@ konusulan_metin = speech_to_text(
     start_prompt="🎤 Konuşmak için bas",
     stop_prompt="⏹️  Durdur",
     just_once=False,
-    use_container_width=True
+    key='sesli_fetih',
 )
 
-# Ses algılanırsa, normal prompt yap
+# --- 🧠 MESAJ İŞLEME MANTIĞI ---
+# 1. Eğer sesle bir şey söylendiyse
 if konusulan_metin:
-    prompt = konusulan_metin
+    # Sesle gelen metni sanki kullanıcı yazmış gibi sisteme alıyoruz
+    prompt = konusulan_metin 
+else:
+    # 2. Ses yoksa klavyeden yazılanı bekle
+    prompt = st.chat_input("İstediğini yaz veya yukarıdan konuş abim...")
+
+# Eğer elimizde bir şekilde (sesle veya yazıyla) bir metin varsa:
+if prompt:
+    # Mesajı ekrana ve hafızaya ekle
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Gemini'ye gönder ve cevap al
+    with st.chat_message("assistant"):
+        try:
+            # Senin mevcut chat_session mantığın
+            response = st.session_state.chat_session.send_message(f"{kisilik}\nSoru: {prompt}")
+            st.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
+        except Exception as e:
+            st.error(f"Hata oluştu abim: {e}")
