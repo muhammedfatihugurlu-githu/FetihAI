@@ -1,12 +1,12 @@
 import streamlit as st
 import google.generativeai as genai
 import time
+from PIL import Image
 import requests
 import io
 import urllib.parse
-import speech_to_text
-from PIL import Image
-
+import random
+from streamlit_mic_recorder import mic_recorder, speech_to_text
 
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
 if "OPENAI_API_KEY" in st.secrets:
@@ -124,3 +124,16 @@ if prompt := st.chat_input("İstediğini yaz abim..."):
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
             st.error(f"Hata: {e}")
+
+# Sesli Komut Butonu
+konusulan_metin = speech_to_text(
+    language='tr',
+    start_prompt="🎤 Konuşmak için bas",
+    stop_prompt="⏹️  Durdur",
+    just_once=False,
+    use_container_width=True
+)
+
+# Ses algılanırsa, normal prompt yap
+if konusulan_metin:
+    prompt = konusulan_metin
