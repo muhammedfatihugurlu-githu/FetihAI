@@ -125,37 +125,46 @@ if prompt := st.chat_input("İstediğini yaz abim..."):
         except Exception as e:
             st.error(f"Hata: {e}")
 
-# Sesli Komut Butonu
-konusulan_metin = speech_to_text(
-    language='tr',
-    start_prompt="🎤 Konuşmak için bas",
-    stop_prompt="⏹️  Durdur",
-    just_once=False,
-    key='sesli_fetih',
-)
+# --- 🎤 SESLİ GİRİŞ (Yukarıda, Araçlar Panelinde Dursun) ---
+with col_cizim: # Veya uygun gördüğün bir sütun
+    st.write("🎙️ **Sesli Komut:**")
+    ses_metni = speech_to_text(
+        language='tr', 
+        start_prompt="🎤 Konuş", 
+        stop_prompt="🛑 Durdur", 
+        just_once=True, # Konuşma bitince sussun
+        key='sesli_fetih'
+    )
 
-# --- 🧠 MESAJ İŞLEME MANTIĞI ---
-# 1. Eğer sesle bir şey söylendiyse
-if konusulan_metin:
-    # Sesle gelen metni sanki kullanıcı yazmış gibi sisteme alıyoruz
-    prompt = konusulan_metin 
-else:
-    # 2. Ses yoksa klavyeden yazılanı bekle
-    prompt = st.chat_input("İstediğini yaz veya yukarıdan konuş abim...")
+# --- ⌨️ YAZILI GİRİŞ (En Altta Dursun) ---
+yazi_metni = st.chat_input("İstediğini yaz abim...")
 
-# Eğer elimizde bir şekilde (sesle veya yazıyla) bir metin varsa:
+# --- 🧠 İKİSİNİ BİRLEŞTİREN MANTIK ---
+# Eğer ses geldiyse onu kullan, yoksa yazıya bak
+prompt = None
+if ses_metni:
+    prompt = ses_metni
+elif yazi_metni:
+    prompt = yazi_metni
+
+# Eğer elimizde bir şekilde bir metin varsa işlemleri başlat
 if prompt:
-    # Mesajı ekrana ve hafızaya ekle
+    # 1. Kullanıcı mesajını ekrana bas ve hafızaya ekle
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Gemini'ye gönder ve cevap al
+    # 2. Gemini'den cevap al
     with st.chat_message("assistant"):
         try:
-            # Senin mevcut chat_session mantığın
-            response = st.session_state.chat_session.send_message(f"{kisilik}\nSoru: {prompt}")
+            # Fotoğraf var mı kontrolü
+            if yuklenen_dosya:
+                img = Image.open(yuklenen_dosya)
+                response = genai.GenerativeModel(MODEL_ISMI).generate_content([f"{kisilik}\nSoru: {prompt}", img])
+            else:
+                response = st.session_state.chat_session.send_message(f"{kisilik}\nSoru: {prompt}")
+            
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"Hata oluştu abim: {e}")
+            st.error(f"Bir aksilik oldu abim: {e}")
