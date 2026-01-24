@@ -105,26 +105,6 @@ with col_foto:
         if yuklenen_dosya:
             st.image(yuklenen_dosya, width=200)
 
-# --- MESAJ ÇUBUĞU ---
-if prompt := st.chat_input("İstediğini yaz abim..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        try:
-            if yuklenen_dosya:
-                img = Image.open(yuklenen_dosya)
-                model_multi = genai.GenerativeModel(MODEL_ISMI)
-                response = model_multi.generate_content([f"{kisilik}\nSoru: {prompt}", img])
-            else:
-                response = st.session_state.chat_session.send_message(f"{kisilik}\nSoru: {prompt}")
-            
-            st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
-        except Exception as e:
-            st.error(f"Hata: {e}")
-
 # --- 🎤 SESLİ GİRİŞ (Yukarıda, Araçlar Panelinde Dursun) ---
 with col_cizim: # Veya uygun gördüğün bir sütun
     st.write("🎙️ **Sesli Komut:**")
