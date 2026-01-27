@@ -22,10 +22,12 @@ icon_url = "https://raw.githubusercontent.com/MuhammedFatihUgurlu/FetihAI/main/i
 
 st.markdown(f"""
     <head>
-        <link rel="apple-touch-icon" href="{icon_url}">
         <link rel="icon" type="image/png" href="{icon_url}">
-        <meta name="apple-mobile-web-app-title" content="FetihAI">
-        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="apple-touch-icon" href="{icon_url}">
+        
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="theme-color" content="#0E1117"> <link rel="shortcut icon" sizes="192x192" href="{icon_url}">
+        <link rel="shortcut icon" sizes="512x512" href="{icon_url}">
     </head>
     """, unsafe_allow_html=True)
 
