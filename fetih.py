@@ -8,12 +8,6 @@ import urllib.parse
 import random
 from streamlit_mic_recorder import mic_recorder, speech_to_text
 
-import streamlit as st
-
-import streamlit as st
-
-import streamlit as st
-
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
 if "OPENAI_API_KEY" in st.secrets:
     SİHİRLİ_ANAHTAR = st.secrets["OPENAI_API_KEY"]
