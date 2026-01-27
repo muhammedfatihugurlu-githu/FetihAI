@@ -8,6 +8,13 @@ import urllib.parse
 import random
 from streamlit_mic_recorder import mic_recorder, speech_to_text
 
+import streamlit as st
+
+st.set_page_config(
+    page_title="FetihAI",
+    page_icon="icon-512.png"
+)
+
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
 if "OPENAI_API_KEY" in st.secrets:
     SİHİRLİ_ANAHTAR = st.secrets["OPENAI_API_KEY"]
@@ -155,3 +162,7 @@ if final_prompt:
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
             st.error(f"Hata oluştu abim: {e}")
+
+            st.markdown("""
+<link rel="manifest" href="/manifest.json">
+""", unsafe_allow_html=True)
