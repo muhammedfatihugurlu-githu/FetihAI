@@ -18,16 +18,20 @@ st.set_page_config(
     layout="wide"
 )
 
+# Senin ikonun GitHub linki
 icon_url = "https://raw.githubusercontent.com/MuhammedFatihUgurlu/FetihAI/main/icon-512.png"
 
 st.markdown(f"""
     <head>
         <link rel="icon" type="image/png" href="{icon_url}">
+        <link rel="shortcut icon" type="image/png" href="{icon_url}">
+        
         <link rel="apple-touch-icon" href="{icon_url}">
+        <meta name="apple-mobile-web-app-capable" content="yes">
         
         <meta name="mobile-web-app-capable" content="yes">
-        <meta name="theme-color" content="#0E1117"> <link rel="shortcut icon" sizes="192x192" href="{icon_url}">
-        <link rel="shortcut icon" sizes="512x512" href="{icon_url}">
+        <meta name="theme-color" content="#0E1117"> <link rel="icon" sizes="192x192" href="{icon_url}">
+        <link rel="icon" sizes="512x512" href="{icon_url}">
     </head>
     """, unsafe_allow_html=True)
 
