@@ -12,28 +12,37 @@ import streamlit as st
 
 import streamlit as st
 
+import streamlit as st
+
+# 1. Önce sayfa ayarını yap (Sekme ismi ve ikonu için)
 st.set_page_config(
-    page_title="FetihAI", # Ana ekrana eklerken çıkacak varsayılan isim
-    page_icon="icon-512.png",
-    layout="wide"
+    page_title="FetihAI",
+    page_icon="https://raw.githubusercontent.com/MuhammedFatihUgurlu/FetihAI/main/icon-512.png"
 )
 
-# Senin ikonun GitHub linki
-icon_url = "https://raw.githubusercontent.com/MuhammedFatihUgurlu/FetihAI/main/icon-512.png"
+# 2. ŞİMDİ ANDROID VE IPHONE İÇİN GİZLİ KOD (Ekranda görünmez)
+st.components.v1.html(
+    """
+    <script>
+    const link1 = window.parent.document.createElement('link');
+    link1.rel = 'apple-touch-icon';
+    link1.href = 'https://raw.githubusercontent.com/MuhammedFatihUgurlu/FetihAI/main/icon-512.png';
+    window.parent.document.getElementsByTagName('head')[0].appendChild(link1);
 
-st.markdown(f"""
-    <head>
-        <link rel="icon" type="image/png" href="{icon_url}">
-        <link rel="shortcut icon" type="image/png" href="{icon_url}">
-        
-        <link rel="apple-touch-icon" href="{icon_url}">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="theme-color" content="#0E1117"> <link rel="icon" sizes="192x192" href="{icon_url}">
-        <link rel="icon" sizes="512x512" href="{icon_url}">
-    </head>
-    """, unsafe_allow_html=True)
+    const link2 = window.parent.document.createElement('link');
+    link2.rel = 'icon';
+    link2.sizes = '192x192';
+    link2.href = 'https://raw.githubusercontent.com/MuhammedFatihUgurlu/FetihAI/main/icon-512.png';
+    window.parent.document.getElementsByTagName('head')[0].appendChild(link2);
+    
+    const meta = window.parent.document.createElement('meta');
+    meta.name = 'mobile-web-app-capable';
+    meta.content = 'yes';
+    window.parent.document.getElementsByTagName('head')[0].appendChild(meta);
+    </script>
+    """,
+    
+)
 
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
 if "OPENAI_API_KEY" in st.secrets:
