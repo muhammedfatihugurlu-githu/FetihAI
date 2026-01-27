@@ -10,10 +10,24 @@ from streamlit_mic_recorder import mic_recorder, speech_to_text
 
 import streamlit as st
 
+import streamlit as st
+
 st.set_page_config(
-    page_title="FetihAI",
-    page_icon="icon-512.png"
+    page_title="FetihAI", # Ana ekrana eklerken çıkacak varsayılan isim
+    page_icon="icon-512.png",
+    layout="wide"
 )
+
+icon_url = "https://raw.githubusercontent.com/MuhammedFatihUgurlu/FetihAI/main/icon-512.png"
+
+st.markdown(f"""
+    <head>
+        <link rel="apple-touch-icon" href="{icon_url}">
+        <link rel="icon" type="image/png" href="{icon_url}">
+        <meta name="apple-mobile-web-app-title" content="FetihAI">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+    </head>
+    """, unsafe_allow_html=True)
 
 # --- GÜVENLİ ANAHTAR KONTROLÜ ---
 if "OPENAI_API_KEY" in st.secrets:
