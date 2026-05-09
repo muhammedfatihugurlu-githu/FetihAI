@@ -16,7 +16,7 @@ else:
     st.error("Abim Secrets kısmında anahtarı bulamadım!")
     st.stop()
 
-st.set_page_config(page_title="FetihAI v0.6", page_icon="🇹🇷⚔️", layout="wide")
+st.set_page_config(page_title="FetihAI v06", page_icon="🇹🇷⚔️", layout="wide")
 
 # --- MODEL AYARI ---
 MODEL_ISMI = 'gemini-2.5-flash' 
