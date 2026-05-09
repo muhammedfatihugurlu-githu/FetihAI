@@ -16,7 +16,7 @@ else:
     st.error("Abim Secrets kısmında anahtarı bulamadım!")
     st.stop()
 
-st.set_page_config(page_title="Muhammed Fatih Uğurlu", page_icon="🇹🇷⚔️", layout="wide")
+st.set_page_config(page_title= "FetihAI v0.6", page_icon="🇹🇷⚔️", layout="wide")
 
 # --- MODEL AYARI ---
 MODEL_ISMI = 'gemini-2.5-flash' 
@@ -75,7 +75,7 @@ with st.sidebar:
             st.rerun()
 
 # --- ANA EKRAN ---
-st.title("🇹🇷⚔️ FetihAI v0.6")
+st.title("🇹🇷⚔️ FetihAI v0.")
 st.caption("Muhammed Fatih Uğurlu'nun Özel Yapay Zeka Asistanı")
 
 # Mesajları Göster
